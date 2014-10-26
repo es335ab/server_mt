@@ -1,12 +1,27 @@
 require "sinatra"
 require "sinatra/reloader"
 require "json"
+require "active_record"
+require "mysql2"
+
+ActiveRecord::Base.configurations = YAML.load_file('./config/database.yml')
+ActiveRecord::Base.establish_connection('production')
+
+class Train < ActiveRecord::Base
+  establish_connection :production
+end
 
 get '/' do
   erb :index
 end
 
 get '/api/metro/:id' do
+
+  content_type :json, :charset => 'utf-8'
+  train = Train.order("time DESC").limit(9)
+  #train.to_json(:root => false)
+
+=begin
   res = [
     {
       line:"Hanzomon",
@@ -63,6 +78,7 @@ get '/api/metro/:id' do
       sort:5
     }
   ]
+=end
 
-  res.to_json
+  train.to_json
 end
